@@ -153,9 +153,57 @@ myObject.foo; // function foo(){..}
 ```javascript
 var myArray = [ "foo", 42, "bar" ];
 
-myArray.length;		// 3
+myArray.length; // 3
 
-myArray[0];			// "foo"
+myArray[0]; // "foo"
 
-myArray[2];			// "bar"
+myArray[2];	// "bar"
 ```
+数组也是对象，所以虽然每个下标都是整数，你仍然可以给数组添加属性：
+```javascript
+var myArray = [ "foo", 42, "bar" ];  
+ 
+myArray.baz = "baz";  
+ 
+myArray.length; // 3 
+ 
+myArray.baz; // "baz"
+```
+可以看到虽然添加了命名属性（无论是通过 . 语法还是 [] 语法），数组的 length 值并未发生变化。
+你完全可以把数组当作一个普通的键 / 值对象来使用，并且不添加任何数值索引，但是这**并不是一个好主意**。数组和普通的对象都根据其对应的行为和用途进行了优化，所以最好只用对象来存储键 / 值对，只用数组来存储数值下标 / 值对。
+
+>注意：如果你视图向数组添加一个属性，但是属性名“看起来”想一个数字，那它会变成一个数值下标(因此会修改数组的内容而不是添加一个属性)：
+
+```javascript
+var myArray = [ "foo", 42, "bar" ];  
+ 
+myArray["3"] = "baz";  
+ 
+myArray.length; // 4 
+ 
+myArray[3]; // "baz"
+```
+
+### 3.3.4 复制对象
+
+JavaScript 初学者最常见的问题之一就是如何复制一个对象。看起来应该有一个内置的 copy()方法，是吧？实际上事情比你想象的更复杂，因为我们无法选择一个默认的复制算法。
+思考一下这个对象：
+```javascript
+function anotherFunction() { /*..*/ }
+
+var anotherObject = {
+	c: true
+};
+
+var anotherArray = [];
+
+var myObject = {
+	a: 2,
+	b: anotherObject,	// reference, not a copy!
+	c: anotherArray,	// another reference!
+	d: anotherFunction
+};
+
+anotherArray.push( anotherObject, myObject );
+```
+如何准确地表示 myObject 的复制呢？
