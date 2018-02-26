@@ -1,0 +1,1 @@
+> 简单基本类型(string,boolean, number, null和undefined)
