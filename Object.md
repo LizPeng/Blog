@@ -39,7 +39,11 @@ Object.prototype.toString.call( strObject ); // [object String]
 
 需要强调的一点事，当我们说“内容”时，_似乎在暗示_ 这些值实际上呗存储在对象内部，但这只是它的表现形式。在引擎内部，这些值的存储方式是多种多样的，一般并不会存在对象容器内部。存储在对象容器内部的是这些属性的名称，它们就像指针(从技术角度来说就是引用)一样，**指向这些值真正的存储位置**。
 思考下面的代码：
+<<<<<<< HEAD
 ```javascrpit
+=======
+```javascript
+>>>>>>> f5aecc674abf43c02eb9de78d07f2d56e557da8d
 var myObject = { 
     a: 2 
 }; 
