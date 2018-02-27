@@ -39,11 +39,7 @@ Object.prototype.toString.call( strObject ); // [object String]
 
 需要强调的一点事，当我们说“内容”时，_似乎在暗示_ 这些值实际上呗存储在对象内部，但这只是它的表现形式。在引擎内部，这些值的存储方式是多种多样的，一般并不会存在对象容器内部。存储在对象容器内部的是这些属性的名称，它们就像指针(从技术角度来说就是引用)一样，**指向这些值真正的存储位置**。
 思考下面的代码：
-<<<<<<< HEAD
 ```javascrpit
-=======
-```javascript
->>>>>>> f5aecc674abf43c02eb9de78d07f2d56e557da8d
 var myObject = { 
     a: 2 
 }; 
@@ -207,3 +203,54 @@ var myObject = {
 anotherArray.push( anotherObject, myObject );
 ```
 如何准确地表示 myObject 的复制呢？
+
+### 3.3.5 属性描述符
+
+- writable
+- enumerable
+- configurable
+
+### 3.3.6 不变性
+
+很重要的一点是，所有的方法创建的都是浅不变形，也就是说，它们只会影响目标对象和它的直接属性。如果目标对象引用了其他对象（数组、对象、函数，等），其他对象的内容不受影响，仍然是可变的：
+```javascript
+myImmutableObject.foo; // [1,2,3]  
+myImmutableObject.foo.push( 4 );  
+myImmutableObject.foo; // [1,2,3,4]
+```
+假设代码中的 myImmutableObject 已经被创建而且是不可变的，但是为了保护它的内容myImmutableObject.foo，你还需要使用下面的方法让 foo 也不可变。
+
+1. 对象常量
+结合`writable:false`和`configurable:false` 就可以创建一个真正的常量属性(不可修改、重定义或者删除)：
+```javascript
+var myObject = {}; 
+ 
+Object.defineProperty( myObject, "FAVORITE_NUMBER", { 
+    value: 42, 
+    writable: false, 
+    configurable: false  
+} );
+```
+2. 禁止扩展
+如果你想禁止一个对象添加新属性并且保留已有属性，可以使用`Object.preventExtensions(..)`：
+```javascript
+var myObject = {  
+    a:2 
+}; 
+ 
+Object.preventExtensions( myObject ); 
+ 
+myObject.b = 3;  
+myObject.b; // undefined
+```
+在非严格模式下，创建属性 b 会静默失败。在严格模式下，将会抛出 TypeError 错误。
+
+3. 密封
+`Object.seal(..)`会创建一个“密封”的对象，这个方法实际上会在一个现有对象上调用`Object.preventExtensions(..)` 并把所有现有属性标记为 `configurable:false` 。
+
+所以，密封之后不仅不能添加新属性，也不能重新配置或者删除任何现有属性（虽然可以修改属性的值）。
+4. 冻结
+
+`Object.freeze(..)` 会创建一个冻结对象，这个方法实际上会在一个现有对象上调用Object.seal(..) 并把所有“数据访问”属性标记为` writable:false`，这样就无法修改它们的值。
+
+> 这个方法是你可以应用在对象上的级别最高的不可变性，它会禁止对于对象本身及其任意直接属性的修改（不过就像我们之前说过的，这个对象引用的其他对象是不受影响的）。
