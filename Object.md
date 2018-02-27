@@ -253,4 +253,120 @@ myObject.b; // undefined
 
 `Object.freeze(..)` 会创建一个冻结对象，这个方法实际上会在一个现有对象上调用Object.seal(..) 并把所有“数据访问”属性标记为` writable:false`，这样就无法修改它们的值。
 
-> 这个方法是你可以应用在对象上的级别最高的不可变性，它会禁止对于对象本身及其任意直接属性的修改（不过就像我们之前说过的，这个对象引用的其他对象是不受影响的）。
+> 这个方法是你可以应用在对象上的级别最高的不可变性，它会禁止对于对象本身及其任意直接属性的修改（不过就像我们之前说过的，**这个对象引用的其他对象是不受影响的**）。
+
+你可以“深度冻结”一个对象，具体方法为，首先在这个对象上调用 Object.freeze(..)，然后遍历它引用的所有对象并在这些对象上调用 Object.freeze(..)。但是一定要小心，因为这样做有可能会在无意中冻结其他（共享）对象。
+
+### 3.3.7[[Get]]
+
+### 3.3.8 [[Put]]
+
+### 3.3.9 Getter和Setter
+对象默认的[[Put]]和[[Get]]操作分别可以控制属性值的设置和获取。
+
+在ES5中可以使用getter和setter部分改写默认操作，但是只能应用在单个属性上，无法应用在整个对象上。getter是一个隐藏函数，会在获取属性值时调用。setter也是一个隐藏函数，会在设置属性值时调用。
+但你给一个属性定义getter、setter或者两者都有时，这个属性会被定义为“访问描述符”（和“数据描述符”相对）。对于访问描述符来说，JavaScript会忽略他们的value和writable特性，取而代之的是关心set和get(还有configurable和enumerbale)的特性。
+
+思考下面的代码：
+```javascript
+var myObject= {
+  // 给a定义一个getter
+  get a() {
+    return a
+  }
+};
+Object.defineProperty(
+  myObject, // 目标对象
+  "b",      // 属性名
+  {         // 描述符
+    // 给b设置一个getter
+    get: function() {return this.a * 2},
+    // 确保b会出现在对象的属性列表中
+    enumerable: true
+  }
+)
+myObject.a //2
+myObject.b //4
+```
+不管是对象文字语法中的 get a() { .. }，还是 defineProperty(..) 中的显式定义，二者都会在对象中创建一个不包含值的属性，对于这个属性的访问会自动调用一个隐藏函数，它的返回值会被当作属性访问的返回值：
+```javascript
+var myObject = { 
+ // 给 a 定义一个 getter 
+    get a() { 
+        return 2;  
+    } 
+}; 
+ 
+myObject.a = 3; 
+ 
+myObject.a; // 2
+```
+由于我们只定义了 a 的 getter，所以对 a 的值进行设置时 set 操作会忽略赋值操作，不会抛出错误。而且即便有合法的 setter，由于我们自定义的 getter 只会返回 2，所以 set 操作是没有意义的。
+> 为了让属性更合理，还应当定义 setter，和你期望的一样，setter 会覆盖单个属性默认的[[Put]]（也被称为赋值）操作。通常来说 getter 和 setter 是成对出现的（只定义一个的话通常会产生意料之外的行为）：
+```javascript
+var myObject = { 
+ // 给 a 定义一个 getter 
+    get a() { 
+        return this._a_;  
+    }, 
+ 
+ // 给 a 定义一个 setter 
+    set a(val) { 
+        this._a_ = val * 2; 
+    }  
+}; 
+ 
+myObject.a = 2;  
+ 
+myObject.a; // 4
+```
+
+### 3.3.10 存在性
+
+前面我们介绍过，如 myObject.a 的属性访问返回值可能是 undefined，但是这个值有可能是属性中存储的 undefined，也可能是因为属性不存在所以返回 undefined。那么如何区分这两种情况呢？
+我们可以在不访问属性值的情况下判断对象中是否存在这个属性：
+```javascript
+var myObject = {  
+    a:2 
+}; 
+ 
+("a" in myObject); // true 
+("b" in myObject); // false  
+ 
+myObject.hasOwnProperty( "a" ); // true 
+myObject.hasOwnProperty( "b" ); // false
+```
+`in`操作符会检查属性是否存在对象及其[[Prototype]]原型链中。
+`hasOwnProperty()`只会检查属性是否在myObject对象中，**不会检查[[Prototype]]链**。
+
+`hasOwnProperty(..)` is accessible for all normal objects via delegation to Object.prototype (see Chapter 5). But it's possible to create an object that does not link to `Object.prototype` (via `Object.create(null)` -- see Chapter 5). In this case, a method call like `myObject.hasOwnProperty(..)` would fail.
+
+这 时 可 以 使 用 一 种 更 加 强 硬 的 方 法 来 进 行 判 断：`Object.prototype.hasOwnProperty.call(myObject,"a")`，它借用基础的 hasOwnProperty(..) 方法并把它显式绑定（参见第 2  章）到 myObject 上。
+
+### 枚举
+“可枚举”就相当于“可以出现在对象属性的便利中”
+> **数组**上应用`for...in`循环时会产生出人意料的结果，因为这种枚举不仅会包含所有的数组索引，还会包含所有可枚举的属性。如果要遍历数组就是用传统的for循环来遍历数值索引。
+```javascript
+var myObject = { };
+
+Object.defineProperty(
+	myObject,
+	"a",
+	// make `a` enumerable, as normal
+	{ enumerable: true, value: 2 }
+);
+
+Object.defineProperty(
+	myObject,
+	"b",
+	// make `b` non-enumerable
+	{ enumerable: false, value: 3 }
+);
+myObject.propertyIsEnumerable("a") // true
+myObject.propertyIsEnumerable("b") // fasle
+Object.keys(myObject) // ["a"]
+Object.getOwnPropertyNames(myObject) // ["a", "b"]
+```
+`propertyIsEnumerable(..)` 会检查给定的属性名是否直接存在于对象中（而不是在原型链上）并且满足 `enumerable:true`。
+`Object.keys(..)` 会返回一个数组，包含所有可枚举属性。
+`Object.getOwnPropertyNames(..)`会返回一个数组，包含所有属性，无论它们是否可枚举。
