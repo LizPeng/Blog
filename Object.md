@@ -374,3 +374,39 @@ Object.getOwnPropertyNames(myObject) // ["a", "b"]
 
 `in` 和 `hasOwnProperty(..)` 的区别在于是否查找 [[Prototype]] 链，然而，`Object.keys(..)`
 和 `Object.getOwnPropertyNames(..)` 都只会查找对象直接包含的属性。
+
+## 3.4 遍历
+
+`for..in` 循环可以用来遍历对的的可枚举属性列表(包括[[Prototype]]链)。
+使用`for..in`遍历对象时无法直接获取属性值的，因为它实际上遍历的是对象中的所有课枚举属性，你需要手动获取属性值。
+
+但如何遍历属性的值呢？
+对于数值索引的数组来说，可以使用标准的for循环来遍历值：
+
+那么如何直接遍历值而不是数组下标(或者对象属性)呢？ES6增加了一种用来遍历数组的`for..of`循环语法(如果对象本身定义了迭代器的话也可以遍历对象):
+```javascript
+var myArray = [ 1, 2, 3 ]; 
+ 
+for (var v of myArray) {  
+    console.log( v ); 
+} 
+// 1  
+// 2  
+// 3
+```
+`for..of`循环首先会向被访问对象请求一个迭代器对象，然后通过调用迭代器对象的`next()`方法来遍历所有返回值。
+数组有内置的@@iterator,因此`for..of`可以直接应用在数组上。我们使用内置的@@iterator来手动遍历数组，看看它是怎么工作的：
+```javascript
+var myArray = [1,2,3]
+var it = myArray[Symbol.iterator]()
+
+it.next(); //{value:1, done: false}
+it.next(); //{value:2, done: false}
+it.next(); //{value:3, done: false}
+it.next(); //{value: undefined, done: true}
+```
+> 我们使用ES6中的符号`Symbol.iterator`来获取对象的@@iterator内部属性。之前我们简单介绍过符号(Symbol，3.3.3节)，跟这里的原理是相同的。引用类似iterator的特殊属性时要使用符号名，而不是符号包含的值。此外，虽然看起来很像一个对象，但是@@iterator本身并不是一个迭代器对象，而是一个繁华迭代器对象的函数--这点非常精妙并且非常重要。
+
+## 3.5 小结
+
+JavaScript中的对象有字面形式`var a = {..}` 和构造形式`var a = new Array(..)`。字面形式更常用，不过有时候构造形式可以提供更多选项。
