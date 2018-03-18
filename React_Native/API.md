@@ -1,0 +1,1 @@
+- [Clipboard](https://reactnative.cn/docs/0.51/clipboard.html#content) :组件可以在iOS和Android的剪贴板中读写内容 `async _getContent() { var content = await Clipboard.getString(); }`

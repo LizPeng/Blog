@@ -76,3 +76,28 @@ p1不是用立即值而是用另一个promise p3决议，后者本身决议值�
 要避免这样的细微区别带来的噩梦，你永远都不应该依赖于不同Promise间回调的顺序和调度。实际上，好的编码实践方案根本不会让多个回调的顺序有丝毫影响，可能的话就要避免。
 
 ### 3.3.3 回调未调用
+```js
+// 用于超时一个Promise的工具
+function timeoutPromise(delay) {
+  return new Promise( function(resolve, reject) {
+    setTimeout(function(){
+      reject("Timeout!");
+    }, delay)
+  }) 
+}
+
+// 设置foo()超时
+Promise.race([
+  foo(),
+  timeoutPromise( 3000 )
+]).then (
+  function(){
+    // foo()及时完成
+  },
+  function(err){
+    // 或者foo被拒绝，或者只是没能按时完成
+    // 查看err来了解是哪种情况
+    
+  }
+)
+````
