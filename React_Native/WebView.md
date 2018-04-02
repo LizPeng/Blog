@@ -1,3 +1,14 @@
+/*
+ * File: WebView.md
+ * Project: React_Native
+ * File Created: Friday, 16th March 2018 10:50:54 am
+ * Author: lizhipeng (lizhipeng2013@163.com)
+ * -----
+ * Last Modified: Wednesday, 28th March 2018 4:26:52 pm
+ * Modified By: lizhipeng (lizhipeng2013@163.com)
+ * -----
+ * Copyright - 2018 Pansoft - XBRL
+ */
 创建一个原生的WebView，可以用于访问一个网页。
 WebView renders web content in a native view.
 
