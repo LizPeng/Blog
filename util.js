@@ -31,3 +31,14 @@ function formatMoney(number, places, symbol, thousand, decimal) {
         i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousand) + 
         (places ? decimal + Math.abs(number - i).toFixed(places).slice(2) : "");
 }
+
+
+// 数据格式化，千分位进位
+function formatNumber(str) {
+  const res = str.toString().replace(/\d+/, n => {
+    return n.replace(/\d(?=(\d{3})+$)/g, function ($1) {
+      return $1 + ',';
+    })
+  })
+  return res;
+}
