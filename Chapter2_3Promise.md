@@ -151,3 +151,67 @@ p.then(
 );
 
 ```
+
+假设我们要调用一个工具foo(..)，且并不确定得到的返回值是否是一个可信任的行为良好的Promise，但我们可以知道它至少是一个thenable。`Promise.resolve(..)`提供了可信任的Promise封装工具，可以链接使用：
+```js
+//不要 只是这么做
+foo(42)
+  .then(function(v) {
+    console.log(v)
+  })
+
+// 而要这样
+Promise.resolve(foo(42))
+  .then(function(v) {
+    console.log(v)
+  })
+```
+
+### 3.8.3 建立信任
+
+## 3.4 链式流
+为了进一步阐释链接，我们把延迟Promise创建(没有决议消息)过程一般化到一个工具中，以便在多个步骤中复用：
+```js
+function delay(time) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(resolve, time)
+  })
+}
+delay(100) // setp1
+.then( function STEP2(){
+  console.log( "setp 2 (after 100ms)" )
+  return delay(200)
+})
+.then( function STEP3(){
+  console.log( "step 3(after another 200ms)")
+})
+.then( function STEP4(){
+  console.log("step4 (next Job)")
+  return delay(50)
+})
+.then( function STEP5(){
+  console.log( "step 5 (after another 50ms)" )
+})
+```
+考虑一个更实际的场景：这里不用定时器，而是构造Ajax请求：
+```js
+// 假定工具ajax({url},{callback})存在
+// Promise-aware ajax
+function request(url) {
+  return new Promise(function(resolve, reject){
+    // ajax(..)回调应该是我们这个promise的resolve(..)函数
+    ajax(url, resolve)
+  });
+}
+```
+```js
+// 我们首先定义一个工具request(..)，用来构造一个表示ajax(..)调用完成的promise
+request("http://some.url.1")
+.then( function(response1){
+  return request("http://some.url.2/?V=" + response1)
+})
+.then(function(response2){
+  console.log(response2)
+})
+```
+我们构建的这个Promise链不仅是一个表达多步异步序列的流程控制，还是一个从一个步骤到下一个步骤传递消息的消息通道。
