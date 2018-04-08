@@ -215,3 +215,59 @@ request("http://some.url.1")
 })
 ```
 我们构建的这个Promise链不仅是一个表达多步异步序列的流程控制，还是一个从一个步骤到下一个步骤传递消息的消息通道。
+如果这个Promise链中的某个步骤出错了怎么办？错误和异常是基于每个Promise的，这意味着可能在链的任意位置捕捉到这样的错误，而这个捕捉动作在某种程度上就相当于在这一位置将整条链“重置”回了正常运作：
+```js
+// 步骤1
+request("http://some.url.1/")
+// 步骤2
+.then( function(){
+  foo.bar() // undefined,出错
+  //永远不会到这里
+  return request("http://some.url.2/?v="+ response1)
+})
+// 步骤3
+.then(
+  function fulfilled(response2){
+     //永远不会到这里
+  },
+  //
+  function rejected(err){
+    console.log(err)
+    // 来自foo.bar()的错误 TypeError
+    return 42
+  }
+)
+// 步骤4
+.then( function(msg){
+  console.log(msg) // 42
+} )
+```
+#### 简单总结一下使链式流程控制可行的Promise固有特性。
+- 调用Promise的then(..)会自动创建一个新的Promise从调用返回。
+- 在完成或拒绝处理函数内部，如果返回一个值或抛出一个异常，新返回的(可链接的)Promise就相应第决议。
+- 如果完成或拒绝处理函数返回一个Promise，它将会被展开，这样一来，不管它的决议值是什么，都会成为当前then(..)返回的链接Promise的决议值。
+
+解释一下为什么单词resolve(比如在Promise.resolve(..)中)如果用于表达结果可能是完成也可能是拒绝，既没有歧义，而且也确实更精确：
+```js
+var rejectTh = {
+  then: function(resolved, rejected){
+    rejected('Oops')
+  }
+}
+var rejectedPr = Promise.resolve(rejectTh) 
+// 返回的Promise实际上就是拒绝状态
+```
+
+提供给`then(..)`的回调，它们应该怎么命名呢？
+```js
+function fulfilled(msg){
+  console.log(msg)
+}
+function rejected(err) {
+  console.error(er)
+}
+p.then(
+  fulfilled,
+  rejected
+)
+```
