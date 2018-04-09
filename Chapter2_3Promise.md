@@ -271,3 +271,45 @@ p.then(
   rejected
 )
 ```
+
+## 3.5 错误处理
+`try..catch`结构只能是同步的，无法用于异步代码模块
+
+一些模式化的错误处理方式已经出现，最值得一提的是error-first回调风格
+```js
+function foo(cb) {
+  setTimeout( function(){
+    try{
+      var x = baz.bar()
+      cb(null,x) //成功
+    }catch(err){
+      cb(err)
+    }
+  } )
+}
+
+foo( function(err, val){
+  if(err) {
+    console.error(err)
+  }else {
+    console.log(val)
+  }
+} )
+```
+传给foo(..)的回调函数保留第一个参数err，用于在出错时接收到信号。如果其存在的话，就认为出错，否则认为是成功。
+
+Promise使用了分离回调(split-callback)风格。一个回调用于完成情况，一个回调用于拒绝情况
+```js
+var p = Promise.reject("Oops")
+p.then(
+  function fulfilled(){
+    //不会到之类
+  },
+  function rejected(err){
+    console.log(err) //  Oops
+  }
+)
+```
+#### 3.5.1 绝望的陷阱
+#### 3.5.2 处理未捕获的情况
+#### 3.5.3 成功的坑
