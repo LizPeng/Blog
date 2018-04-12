@@ -313,3 +313,136 @@ p.then(
 #### 3.5.1 绝望的陷阱
 #### 3.5.2 处理未捕获的情况
 #### 3.5.3 成功的坑
+- 默认情况下，Promise在下一个任务或时间循环tick上(向开发者终端)报告所有拒绝，如果在这个时间点上该Promise上还没有注册错误处理函数。
+- 如果想要一个被拒绝的Promise在查看之前的某个时间段内保持被拒绝状态，可以调用defer()，这个函数优先级高于Promise的自动错误报告。
+如果一个Promise被拒绝的话，默认情况下会向开发者终端报告这个事实(而不是默认为沉默)。可以选择隐式(在拒绝之前注册一个错误处理函数)或者显示(通过defer())禁止这种报告。在这两种情况下，都是由你来控制误报的情况。
+考虑：
+```js
+var p = Promise.reject("Oops").defer();
+
+// foo(..) 是支持Promise的
+foo(42)
+  .then(
+    function fulfilled(){
+      return p;
+    },
+    function rejected(err){
+      // 处理foo(..)错误
+    }
+  )
+```
+
+## 3.6 Promise模式
+1.超时竞赛
+```js
+//foo()是一个支持Promsie的函数
+
+// 前面定义的timeoutPromise(..)返回一个Promise
+// 这个promise会在指定延时之后拒绝
+
+// 为foo()设定超时
+Promise.race([
+  foo(),               // 启动foo()
+  timeoutPrimise(3000) // 给它3秒
+])
+  .then(
+    function(){
+      // foo(..)按时完成
+    },
+    function(err){
+      // 要么foo()被拒绝，要么指示没能够按时完成，
+      // 因此要查看err了解具体原因
+    }
+  )
+```
+大多数情况下，这个超时模式能够很好地工作。
+
+2.finally
+同时我们可以构建一个静态辅助工具来支持查看(而不影响)Promise的决议：
+```js 
+//polyfill安全的guard检查
+if(!Promise.observe){
+  Promise.observe = function(pr, cb) {
+    //观察pr的决议
+    pr.then(
+      function fulfilled(msg){
+        // 安排异步回调(作为Job)
+        Promise.resolve( msg ).then(cb)
+      },
+      function rejected(err){
+        Promsie.resolve( err ).then(cb)
+      }
+    );
+    // return origin promise
+    return pr
+  }
+}
+// 如何在超时例子中使用这个工具
+Promise.race([
+  Promise.observe(
+    foo(),  //试着运行foo()
+    function cleanup(msg){
+      // 在foo()之后清理，即使它没有在超时之前完成
+    },
+    timeoutPromise(3000) //给它3秒
+  )
+])
+```
+> 这个辅助工具Promise.observe(..)只是用来展示可以如何查看Promise的完成而不对其产生影响。
+```js
+// 定义first()
+if(!Promise.first) {
+  Promise.first = function(prs) {
+    return new Promise( function(resolve, reject){
+      // 在所有promise上循环
+      prs.forEach( function(pr){
+        // normalize the value
+        Promise.resolve(pr)
+          // whichever one fulfills first wins, and
+			  	// gets to resolve the main promise
+          .then(resolve)
+      } )
+    } )
+  }
+}
+```
+### 3.6.4 并发迭代
+一个异步的map(..)工具。它接收一个数组的值(可以是Promise或其他任何值)，外加要在每个值上运行一个函数(任务)作为参数。map(..)本身返回一个promise,其完成值是一个数组，该数组(保持映射顺序)保存任务执行之后的异步完成值：
+```js
+if(!Promise.map) {
+  Promise.map = function(vals, cb){
+    // 一个等待所有map的promise的新promise
+    return Promise.all(
+      vals.map(function(val){
+        return new Promise(function(resolve){
+          cb(val, resolve)
+        })
+      })
+    )
+  }
+}
+// 在这个map(..)实现中，不能发送异步拒绝信号，但如果在映射的回调(cb(..))内出现同步的异常
+// 或错误，主Promise.map(..)返回的promise就会拒绝
+
+
+// 在一组promise使用map
+var p1 = Promise.resolve( 21 );
+var p2 = Promise.resolve( 42 );
+var p3 = Promise.reject( "Oops" );
+
+Promise.map([p1,p2,p3], function(pr,done){
+  // make sure the item itself is a Promise
+  Promise.resolve(pr)
+    .then(
+      function(v) {
+        // map完成的v到新值
+        done(v*2)
+      },
+      done //
+    )
+})
+.then( function(vals){
+  console.log(vals) // [42,84,"Oops"]
+} )
+
+```
