@@ -406,15 +406,17 @@ if(!Promise.first) {
   }
 }
 ```
-### 3.6.4 并发迭代
+### 3.6.4 并发迭代 !!!!!!!!!!!!!!!!!
 一个异步的map(..)工具。它接收一个数组的值(可以是Promise或其他任何值)，外加要在每个值上运行一个函数(任务)作为参数。map(..)本身返回一个promise,其完成值是一个数组，该数组(保持映射顺序)保存任务执行之后的异步完成值：
 ```js
 if(!Promise.map) {
   Promise.map = function(vals, cb){
     // 一个等待所有map的promise的新promise
+    // 返回一个数组->由三个新的promise组成
     return Promise.all(
       vals.map(function(val){
         return new Promise(function(resolve){
+          // 每一个val就是一个promise
           cb(val, resolve)
         })
       })
@@ -435,6 +437,8 @@ Promise.map([p1,p2,p3], function(pr,done){
   Promise.resolve(pr)
     .then(
       function(v) {
+        // 不明白done如何工作的？
+        console.log(done)
         // map完成的v到新值
         done(v*2)
       },
