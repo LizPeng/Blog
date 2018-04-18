@@ -475,3 +475,9 @@ Promise.resolve(..)常用于创建一个已完成的Promise, 但是Promise.resol
 catch(..)只接受一个拒绝回调作为参数，并自动替换默认完成回调。换句话说，它等价于`then(null, ..)`
 
 then(..)和catch(..)也会创建并返回一个新的promise，这个promise可以用于实现Promise链式流程控制。如果完成或拒绝回调中抛出异常，返回的promise是被拒绝的。如果任意一个回调返回非Promise、非thenable的立即值，这个值会被用作返回promise的完成值。如果完成处理函数返回一个promise或thenable，那么这个值就会被展开，并作为返回promise的决议值。
+
+#### 3.7.4 Promise.all([..])和Promise.race([..])
+Promise.all([..])只有传入的所有promise都完成，返回promise才能完成。如果有任何promise拒绝，返回的主promise就立即会被拒绝。如果完成的话，你会得到一个数组，其中包含传入的所有promise的完成值。
+
+Promise.race([..])来说，只有第一个决议的promise(完成或拒绝)取胜，并且其决议结果成为返回promise的决议。
+
