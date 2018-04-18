@@ -450,3 +450,28 @@ Promise.map([p1,p2,p3], function(pr,done){
 } )
 
 ```
+
+## 3.7 Promise API 概述
+#### 3.7.1 new Promise(..)构造器
+有启示性的构造器Promise必须和new一起使用，并且必须提供一个回调函数。这个毁掉是同步的或者立即调用的。这个函数接受两个函数回调，用以支持promise的决议。通常我们把这两个函数成为resolve和reject
+```js
+var p = new Promise(function(resolve, reject){
+  resolve()
+  reject() //用于拒绝
+})
+```
+resolve(..)既可能完成promise，也可能拒绝，要根据传入参数而定。如果传给resolve的是一个非promise、非thenable的立即值，这个promise就会用这个值完成。
+但是，如果传入resolve是一个真正的promise或thenable值，这个值就会被递归展开，并且(要构造的)promise将取用其最终决议值或状态。
+
+#### 3.7.2 Promise.resolve(..)和Promise.reject(..)
+创建一个被拒绝的Promise的快捷方式是使用Promise.reject(..)
+Promise.resolve(..)常用于创建一个已完成的Promise, 但是Promise.resolve(..)也会展开thenable值。返回的Promise采用传入的这个thenable的最终决议值，可能是完成，也可能是拒绝
+#### 3.7.3 then()和catch()
+
+每个Promise实例(不是Promise API命名空间)都有then(..)和catch(..)方法，通过这两个方法可以为这个Promise注册完成和拒绝处理函数。Promise决议之后，立即会调用这两个处理函数之一，但不会两个都调用，而且总是异步调用。
+
+> `then(..)`接受一个或两个参数：第一个用于完成回调，第二个用于拒绝回调。如果两者中的任何一个被省略或者作为非函数值传入的话，就会替换为相应的 **默认回调**。默认完成回调只是把消息传递下去，而默认拒绝回调则是只是重新抛出(传播)其接收到的出错原因。
+
+catch(..)只接受一个拒绝回调作为参数，并自动替换默认完成回调。换句话说，它等价于`then(null, ..)`
+
+then(..)和catch(..)也会创建并返回一个新的promise，这个promise可以用于实现Promise链式流程控制。如果完成或拒绝回调中抛出异常，返回的promise是被拒绝的。如果任意一个回调返回非Promise、非thenable的立即值，这个值会被用作返回promise的完成值。如果完成处理函数返回一个promise或thenable，那么这个值就会被展开，并作为返回promise的决议值。
