@@ -24,7 +24,7 @@ class CustomFlatList extends FlatList {
     }
 }
 
-// 在didmount和 diduptate调用如下
+// 在didUptate调用如下  ，didMount可以不调用
 let wait = new Promise((resolve) => setTimeout(resolve, 500));  // Smaller number should work
 wait.then( () => {
     this._scrollFlat.scrollToIndex({index: index, animated: true});
