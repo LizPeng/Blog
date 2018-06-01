@@ -29,3 +29,6 @@ let wait = new Promise((resolve) => setTimeout(resolve, 500));  // Smaller numbe
 wait.then( () => {
     this._scrollFlat.scrollToIndex({index: index, animated: true});
 });
+if(this._scrollFlat.props.data.length > 0){
+    setTimeout(()=>this._scrollFlat.scrollToIndex({index: 0, animated: true}), 100);
+}
