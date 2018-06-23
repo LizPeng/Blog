@@ -1,4 +1,4 @@
-// enum 枚举
+// enum 枚举 https://www.tslang.cn/docs/handbook/basic-types.html
 var Color;
 (function (Color) {
     Color[Color["Red"] = 0] = "Red";
