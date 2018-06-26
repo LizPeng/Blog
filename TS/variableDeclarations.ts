@@ -34,3 +34,18 @@ let strLength: number = (<string>someValue).length
 let strasLength: number = (someValue as string).length
 
 // 当你在ts使用jsx时，只有as语法是被允许的
+////////////////////////////以上为基础类型
+
+// 属性rename
+const o = {a: '', b: ''}
+let {a: newName1, b: newName2} = o
+// 解构 用于函数声明
+type C = {a: string, b?: number}
+function f({a,b}: C) :void {
+    //
+}
+// 解构默认值，在默认值之前设置其格式
+function f1({a,b} = {a: "", b: 0}): void {
+
+}
+f1();  // ok, default to { a: "", b: 0 }
