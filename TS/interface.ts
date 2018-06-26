@@ -74,7 +74,9 @@ let myArray: StringArray;
 myArray = ['bob', 'fred']
 let myStr: string = myArray[0]
 
-// 类类型，强制一个类去符合某种契约
+// 类类型，
+//  实现接口implements
+// 强制一个类去符合某种契约
 // interface ClockInterface{
 //   currentTime: Date;
 //   //在接口中描述一个方法，在类里实现它
@@ -111,3 +113,38 @@ class AnalogClock implements ClockInterface {
   }
 }
 let digital = createClock(DigtialClock, 12, 17)
+
+// 继承接口
+interface Shape {
+  color: string;
+}
+interface Square extends Shape {
+  sideLength: number
+}
+let square = <Square>{};
+square.color = "blue";
+square.sideLength = 10;
+// 继承多个接口
+interface PenStroke {
+  penWidth: number;
+}
+interface Square1 extends Shape, PenStroke {
+  sideLength: number;
+}
+
+// 混合类型
+// 一个对象可以同时作为函数和对象使用，并带有额外的属性
+interface Counter {
+  (start: number): string;
+  interval: number;
+  reset(): void;
+}
+function getCounter(): Counter {
+  let counter = <Counter>function (start: number) {};
+  counter.interval =123;
+  counter.reset = function(){}
+  return counter
+}
+let d = getCounter();
+d(10)
+d.reset()
