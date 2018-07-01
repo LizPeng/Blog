@@ -148,3 +148,37 @@ function getCounter(): Counter {
 let d = getCounter();
 d(10)
 d.reset()
+
+/**
+ * 接口继承类
+ * 接口继承了一个类类型时，它会继承类的成员但不包括其实现。
+ * 就好像接口声明了所有类中存在的成员，但并没有提供具体实现一样。
+ * 接口同样会继承到类的private和protected成员。
+ * 这意味着当你创建了一个接口继承了一个拥有私有或受保护的成员的类时
+ * 这个接口只能被这个类或其子类所实现implement
+ */
+class Control {
+  private state: any;
+}
+interface SelectableControl extends Control {
+  select(): void;
+}
+
+class Button extends Control implements SelectableControl {
+  select() { }
+}
+
+class TextBox extends Control {
+  select() { }
+}
+class Image1 implements SelectableControl {
+  
+  select() {}
+}
+/**
+ * 在上面的例子里，SelectableControl包含了Control的所有成员，包括私有成员state
+ * 因为state是私有成员，所以只能够是Control的子类们才能实现SelectableControl接口
+ * 因为只有Control的子类才能够 拥有一个声明于Control的私有成员state，这对私有成员的兼容性是必须的。
+ * 
+ * 
+ */
