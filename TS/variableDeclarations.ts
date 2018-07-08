@@ -8,7 +8,6 @@ let c: Color = Color.Green;
 /**
  * void表示没有任何类型，
  * 声明一个void类型的便利没有什么大用，因为你只能为他赋予undefined和null
-
  */
 function warnUser(): void{
     alert("blabla")
@@ -20,7 +19,6 @@ function warnUser(): void{
  * Never
  * 表示是那些永不存在的值的类型
  * 是那些会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型
- * 
  */
 function error(message: string): never {
     throw new Error(message);

@@ -207,3 +207,25 @@ department = new AcountingDepartment();
 department.printName();
 department.printMeeting();
 // department.generateRepors() 方法在声明的抽象类中不存在
+
+
+// 高级技巧
+
+class HigherGreeter {
+    static standardGreeting = "Hello, there";
+    greeting: string;
+    greet() {
+        if (this.greeting) {
+            return "Hello, " + this.greeting;
+        }
+        else {
+            return HigherGreeter.standardGreeting;
+        }
+    }
+}
+let greeter1: HigherGreeter;
+greeter1 = new HigherGreeter();
+console.log(greeter1.greet())
+
+let greeterMaker: typeof HigherGreeter = HigherGreeter;
+greeterMaker.standardGreeting = 'Hey, there'
