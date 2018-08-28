@@ -212,5 +212,33 @@ class UIElement {
 
 // 枚举成员类型
 /**
- * 可辨识联合
+ * 可辨识联合,具有3个要是
+ * 1具有普通的单例类型属性
+ * 2一个类型别名包含了那些类型的联合
+ * 3从属性上的类型保护
  */
+// 使用never类型，来进行完整性检查
+interface Square {
+    kind: "square";
+    size: number;
+}
+interface Rectangle {
+    kind: "rectangle";
+    width: number;
+    height: number;
+}
+interface Circle {
+    kind: "circle";
+    radius: number;
+}
+
+type Shape = Square | Rectangle | Circle | Triangle;
+function area(s: Shape): number {
+    switch (s.kind) {
+        case "square": return s.size * s.size;
+        case "rectangle": return s.height * s.width;
+        case "circle": return Math.PI * s.radius ** 2;
+    }
+}
+
+// 多态的this类型
