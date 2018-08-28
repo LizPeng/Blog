@@ -35,7 +35,7 @@ jim.log();
 ```
 
 ### 联合类型 union Types
-联合类型表示一个值 可以是几种类型之一，我们用 | 分个每个类型 。如果一个值是一个联合类型，我们只能访问联合类型的所有类型里共有的成员。
+联合类型表示一个值 可以是几种类型之一，我们用 `|` 分隔每个类型 。如果一个值是一个联合类型，我们只能访问联合类型的所有类型里 共有的成员。
 
 ```ts
 interface Bird {
@@ -60,6 +60,7 @@ pet.swim();    // errors
 
 ```ts
 let pet = getSmallPet();
+
 if((<Fish>pet).swim) {
     (<Fish>pet).swim()
 }else {
@@ -69,7 +70,7 @@ if((<Fish>pet).swim) {
 ```
 
 ### user-Defined Type Guard
-To define a type guard, we simply need to defin a function whose return type is a type predicate:
+To define a type guard, we simply need to define a function whose return type is a type predicate:
 ```ts
 function isFish(pet: Fish | Bird): pet is Fish {
     return (<Fish>pet).swim !== undefined;
