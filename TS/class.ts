@@ -229,3 +229,4 @@ console.log(greeter1.greet())
 
 let greeterMaker: typeof HigherGreeter = HigherGreeter;
 greeterMaker.standardGreeting = 'Hey, there'
+
